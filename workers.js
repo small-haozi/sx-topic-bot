@@ -82,7 +82,7 @@ async function createForumTopic(topicName, userName, nickname) {
   const now = new Date()
   const formattedTime = now.toISOString().replace('T', ' ').substring(0, 19)
 
-  const pinnedMessage = `昵称: ${nickname}\n用户名: ${userName}\n发起时间: ${formattedTime}`
+  const pinnedMessage = `昵称: ${nickname}\n用户名: ${userName}\nUserID: ${userId}\n发起时间: ${formattedTime}`
   const messageResponse = await sendMessageToTopic(topicId, pinnedMessage)
   const messageId = messageResponse.result.message_id
   await pinMessage(topicId, messageId)
