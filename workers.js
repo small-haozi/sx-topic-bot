@@ -167,14 +167,22 @@ async function pinMessage(topicId, messageId) {
   }
 }
 
-async function forwardMessageToPrivateChat(chatId, message) {
-  const response = await fetchWithRetry(`https://api.telegram.org/bot${BOT_TOKEN}/copyMessage`, {
+async function forwardMessageToPrivateChat(privateChatId, message) {
+  const text = message.text || message.caption || ''
+  if (!text) {
+    console.error('Message text is empty, cannot forward')
+    return
+  }
+
+  console.log(`Forwarding message to private chat: ${privateChatId}, text: ${text}`)
+
+  const response = await fetchWithRetry(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      chat_id: chatId,
-      from_chat_id: message.chat.id,
-      message_id: message.message_id
+      chat_id: privateChatId,
+      text: text,
+      parse_mode: 'Markdown'
     })
   })
   const data = await response.json()
