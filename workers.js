@@ -20,8 +20,15 @@ async function handleUpdate(update) {
   }
 }
 
+
+
 async function onMessage(message) {
   const chatId = message.chat.id.toString()
+    // 忽略初始的 /start 消息
+  if (message.text && message.text === '/start') {
+    await sendMessageToUser(chatId, "你好，欢迎使用私聊机器人！")
+    return
+  }
 
   // 检查是否是管理员的回复消息
   if (chatId === GROUP_ID) {
