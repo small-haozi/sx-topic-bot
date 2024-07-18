@@ -168,26 +168,40 @@ async function pinMessage(topicId, messageId) {
 }
 
 async function forwardMessageToPrivateChat(privateChatId, message) {
-  const text = message.text || message.caption || ''
-  if (!text) {
-    console.error('Message text is empty, cannot forward')
-    return
-  }
+  if (message.text || message.caption) {
+    const text = message.text || message.caption
+    console.log(`Forwarding message to private chat: ${privateChatId}, text: ${text}`)
 
-  console.log(`Forwarding message to private chat: ${privateChatId}, text: ${text}`)
-
-  const response = await fetchWithRetry(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: privateChatId,
-      text: text,
-      parse_mode: 'Markdown'
+    const response = await fetchWithRetry(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: privateChatId,
+        text: text,
+        parse_mode: 'Markdown'
+      })
     })
-  })
-  const data = await response.json()
-  if (!data.ok) {
-    throw new Error(`Failed to forward message to private chat: ${data.description}`)
+    const data = await response.json()
+    if (!data.ok) {
+      throw new Error(`Failed to forward message to private chat: ${data.description}`)
+    }
+  } else {
+    // 修改点：处理所有非文本消息，包括图片
+    console.log(`Forwarding non-text message to private chat: ${privateChatId}`)
+
+    const response = await fetchWithRetry(`https://api.telegram.org/bot${BOT_TOKEN}/copyMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: privateChatId,
+        from_chat_id: message.chat.id,
+        message_id: message.message_id
+      })
+    })
+    const data = await response.json()
+    if (!data.ok) {
+      throw new Error(`Failed to forward non-text message to private chat: ${data.description}`)
+    }
   }
 }
 
